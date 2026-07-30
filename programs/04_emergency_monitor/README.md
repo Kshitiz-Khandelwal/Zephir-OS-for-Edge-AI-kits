@@ -20,6 +20,28 @@ Demonstrates how to use `k_uptime_get_32()` to create non-blocking timers (simil
 
 > **Note:** Use 330Ω resistors in series with each LED to prevent them from burning out!
 
+## 🧠 Concepts Explained
+
+### The Problem: Blocking Delays
+If a microcontroller executes a `delay(1000)` to wait for an LED to blink, the processor sits there doing absolutely nothing. During that 1000ms:
+- A sensor cannot be read.
+- A display cannot be updated.
+- A Wi-Fi transmission is delayed.
+This is known as a **blocking operation**. It prevents the program from performing other work until the current operation finishes, making the system unresponsive.
+
+### The Solution: Non-Blocking Timing
+Instead of asking the CPU to *"Wait for 1000 ms"*, we ask it *"Has 1000 ms elapsed?"*
+
+This is exactly what Program 04 does in Thread 1 using `k_uptime_get_32()`. 
+```c
+currentTime = k_uptime_get_32();
+if (currentTime - lastLEDTime >= 1000) {
+    blinkLED();
+    lastLEDTime = currentTime;
+}
+```
+The processor never stops running and looping. It simply checks if the required time has passed. If it hasn't, it skips the `if` block and is instantly free to do other things (like checking the emergency touch sensor). Since the processor loops millions of times a second, neither task blocks the other!
+
 ## Pre-compiled Firmware
 You can flash this program directly to your board without building it yourself.
 1. Hold **BOOTSEL** on your Pico 2.
