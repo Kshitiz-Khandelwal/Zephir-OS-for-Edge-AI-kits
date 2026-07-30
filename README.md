@@ -223,120 +223,27 @@ build\zephyr\zephyr.uf2
 
 ## Programs in This Repo
 
+Each program has its own folder containing the source code, pre-compiled `.uf2` file, and detailed wiring instructions.
+
 ### 01 — 3-Color LED Blink
-
 **Folder:** `programs/01_led_blink/`
-
-**Wiring:**
-```
-Pico 2 GP0  →  [330Ω]  →  RED LED (+)    →  GND
-Pico 2 GP1  →  [330Ω]  →  GREEN LED (+)  →  GND
-Pico 2 GP2  →  [330Ω]  →  BLUE LED (+)   →  GND
-```
-
-**What it does:** Blinks all 3 LEDs ON for 1 second, OFF for 1 second.
-
-**Build:**
-```powershell
-west build -b rpi_pico2/rp2350a/m33 programs\01_led_blink
-```
-
----
+- Sequentially blinks 3 external LEDs.
+- [View Wiring & Details](programs/01_led_blink/)
 
 ### 02 — DC Motor Control (L298N)
-
 **Folder:** `programs/02_dc_motor/`
-
-**Wiring:**
-```
-Pico 2 GP2  →  L298N IN1     (direction)
-Pico 2 GP3  →  L298N IN2     (direction)
-Pico 2 GP4  →  L298N ENA     (speed via PWM) ← remove jumper!
-Pico 2 GND  →  L298N GND     (COMMON GROUND — required!)
-
-L298N OUT1  →  Motor +
-L298N OUT2  →  Motor −
-
-External 6-12V battery  →  L298N 12V & GND
-```
-
-**What it does:**
-1. Forward at 50% speed (3 sec)
-2. Ramps to 100% speed (1.5 sec)
-3. Stop (1 sec)
-4. Backward at 75% (3 sec)
-5. Repeat
-
-**Build:**
-```powershell
-west build -b rpi_pico2/rp2350a/m33 programs\02_dc_motor
-```
-
----
+- Controls a DC Motor using an L298N driver and PWM for speed control.
+- [View Wiring & Details](programs/02_dc_motor/)
 
 ### 03 — Dual LED Blink with RTOS Threads
-
 **Folder:** `programs/03_threads_dual_led/`
-
-**Wiring:**
-```
-Pico 2 GP14  →  [330Ω]  →  LED1 (+)  →  GND   (blinks every 500 ms)
-Pico 2 GP15  →  [330Ω]  →  LED2 (+)  →  GND   (blinks every 200 ms)
-```
-
-**What it does:**
-- Thread 1 (main): toggles LED1 every **500 ms**
-- Thread 2 (spawned via `K_THREAD_DEFINE`): toggles LED2 every **200 ms**
-- Both run **simultaneously** — demonstrating true RTOS multithreading
-
-**MicroPython → Zephyr translation:**
-
-| MicroPython | Zephyr RTOS |
-|-------------|-------------|
-| `_thread.start_new_thread(fn, ())` | `K_THREAD_DEFINE(name, stack, fn, ...)` |
-| `time.sleep(0.5)` | `k_sleep(K_MSEC(500))` |
-| `led.toggle()` | `gpio_pin_toggle(dev, pin)` |
-
-**Build:**
-```powershell
-west build -b rpi_pico2/rp2350a/m33 programs\03_threads_dual_led
-```
-
----
+- Uses `K_THREAD_DEFINE` to blink two LEDs at different rates simultaneously.
+- [View Wiring & Details](programs/03_threads_dual_led/)
 
 ### 04 — Emergency Monitor & Non-Blocking Timers
-
 **Folder:** `programs/04_emergency_monitor/`
-
-**Wiring:**
-```
-Pico 2 GP14  →  [330Ω]  →  LED_FAST (+)      →  GND
-Pico 2 GP15  →  [330Ω]  →  LED_SLOW (+)      →  GND
-Pico 2 GP13  →  [330Ω]  →  LED_EMERGENCY (+) →  GND
-Pico 2 GP16  →  Touch Sensor / Button        →  3.3V (VCC)
-```
-
-**What it does:**
-- Thread 1 (Main Loop):
-  - Uses `k_uptime_get_32()` to check the time non-blockingly.
-  - Toggles `LED_FAST` every **200 ms**.
-  - Toggles `LED_SLOW` every **1000 ms**.
-- Thread 2 (Emergency Monitor):
-  - Continuously checks the sensor on `GP16`.
-  - If triggered (goes HIGH), it interrupts its normal wait and rapidly flashes `LED_EMERGENCY` 5 times with a 50ms delay.
-
-**MicroPython → Zephyr translation:**
-
-| MicroPython | Zephyr RTOS |
-|-------------|-------------|
-| `time.ticks_ms()` | `k_uptime_get_32()` |
-| `time.ticks_diff(c, l)` | `current_time - last_time` |
-| `Pin(16, IN, PULL_DOWN)` | `gpio_pin_configure(..., GPIO_INPUT \| GPIO_PULL_DOWN)` |
-
-**Build:**
-```powershell
-west build -b rpi_pico2/rp2350a/m33 programs\04_emergency_monitor
-```
+- Non-blocking main loop timers plus a dedicated thread monitoring a sensor.
+- [View Wiring & Details](programs/04_emergency_monitor/)
 
 ---
 
