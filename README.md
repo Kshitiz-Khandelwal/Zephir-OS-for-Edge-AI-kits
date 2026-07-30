@@ -280,6 +280,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Configures a hardware interrupt on GP2 so the CPU instantly halts whatever it's doing (even sleeping) to service a button press with zero latency, entirely replacing inefficient polling.
 - [View Wiring & Concepts Explained](programs/11_gpio_interrupt/)
 
+### 12 — PWM Task (Concurrent Fading)
+**Folder:** `programs/12_pwm_task/`
+- Demonstrates RTOS preemption by running a rapid 500Hz Software PWM loop to fade an RGB LED, while seamlessly allowing a background Status Thread to wake up and print exactly on time without jitter.
+- [View Wiring & Concepts Explained](programs/12_pwm_task/)
+
 ---
 
 ## Concepts & Theory 🧠
