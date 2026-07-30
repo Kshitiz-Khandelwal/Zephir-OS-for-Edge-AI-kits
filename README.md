@@ -285,6 +285,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Demonstrates RTOS preemption by running a rapid 500Hz Software PWM loop to fade an RGB LED, while seamlessly allowing a background Status Thread to wake up and print exactly on time without jitter.
 - [View Wiring & Concepts Explained](programs/12_pwm_task/)
 
+### 13 — Multiple Sensor Monitoring (ADC & Multitasking)
+**Folder:** `programs/13_multiple_sensor_monitoring/`
+- The ultimate multitasking experiment! Uses the Zephyr ADC API to read three different analog sensors (Temperature, LDR, Joystick) simultaneously across three completely independent threads, each running at their own unique intervals (1000ms, 500ms, 200ms).
+- [View Wiring & Concepts Explained](programs/13_multiple_sensor_monitoring/)
+
 ---
 
 ## Concepts & Theory 🧠
