@@ -250,6 +250,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Custom Bit-Banged communication protocol in C with concurrent LED heartbeat.
 - [View Wiring & Concepts Explained](programs/05_tm1637_display/)
 
+### 06 — Thread Priorities & Preemption
+**Folder:** `programs/06_thread_priorities/`
+- Spawns 3 independent RTOS threads and uses thread priority to allow an emergency task to preempt normal tasks.
+- [View Wiring & Concepts Explained](programs/06_thread_priorities/)
+
 ---
 
 ## Concepts & Theory 🧠
