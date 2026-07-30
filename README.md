@@ -300,6 +300,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Demonstrates the classic RTOS Producer-Consumer pattern. A Keypad thread (Producer) scans a 4x4 matrix and safely passes the pressed key via a Mutex to a Display thread (Consumer) which processes it independently.
 - [View Wiring & Concepts Explained](programs/15_keypad_communication/)
 
+### 16 — Data Logging (ADC & Mutex Flags)
+**Folder:** `programs/16_data_logging/`
+- Solves the problem of threads running at vastly different speeds. A 1000ms Logger thread updates an ADC reading and sets a `new_data` flag, which a hyper-responsive 100ms Display thread consumes immediately without wasting CPU cycles.
+- [View Wiring & Concepts Explained](programs/16_data_logging/)
+
 ---
 
 ## Concepts & Theory 🧠
