@@ -154,8 +154,6 @@ static int16_t read_adc(uint8_t channel) {
  * ───────────────────────────────────────────────────────────── */
 void temperature_task(void *a, void *b, void *c)
 {
-	setup_adc_channel(TEMP_CHANNEL);
-	
 	while (1) {
 		int16_t raw_val = read_adc(TEMP_CHANNEL);
 		float temp_c = 20.0 + ((float)raw_val / 4095.0) * 20.0; /* Mock conversion */
@@ -176,8 +174,6 @@ void temperature_task(void *a, void *b, void *c)
  * ───────────────────────────────────────────────────────────── */
 void light_task(void *a, void *b, void *c)
 {
-	setup_adc_channel(LDR_CHANNEL);
-	
 	while (1) {
 		int16_t raw_val = read_adc(LDR_CHANNEL);
 		
@@ -197,8 +193,6 @@ void light_task(void *a, void *b, void *c)
  * ───────────────────────────────────────────────────────────── */
 void joystick_task(void *a, void *b, void *c)
 {
-	setup_adc_channel(JOY_CHANNEL);
-	
 	while (1) {
 		int16_t raw_val = read_adc(JOY_CHANNEL);
 		
@@ -259,6 +253,10 @@ int main(void)
 		printf("ADC device not ready!\n");
 		return -1;
 	}
+
+	setup_adc_channel(TEMP_CHANNEL);
+	setup_adc_channel(LDR_CHANNEL);
+	setup_adc_channel(JOY_CHANNEL);
 
 	gpio_dev = DEVICE_DT_GET(DT_NODELABEL(gpio0));
 	if (!device_is_ready(gpio_dev)) {
