@@ -290,6 +290,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - The ultimate multitasking experiment! Uses the Zephyr ADC API to read three different analog sensors (Temperature, LDR, Joystick) simultaneously across three completely independent threads, each running at their own unique intervals (1000ms, 500ms, 200ms).
 - [View Wiring & Concepts Explained](programs/13_multiple_sensor_monitoring/)
 
+### 14 — Advanced Sensor Display (ADC, TM1637, 4 Threads & Mutexes)
+**Folder:** `programs/14_advanced_sensor_display/`
+- A capstone architectural upgrade. Combines 3 independent ADC sensor threads and 1 TM1637 display thread. Safely shares sensor data across all 4 threads using an RTOS Mutex (`k_mutex`) while seamlessly outputting to both hardware and Serial!
+- [View Wiring & Concepts Explained](programs/14_advanced_sensor_display/)
+
 ---
 
 ## Concepts & Theory 🧠
