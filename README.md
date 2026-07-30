@@ -274,6 +274,72 @@ west build -b rpi_pico2/rp2350a/m33 programs\02_dc_motor
 
 ---
 
+### 03 — Dual LED Blink with RTOS Threads
+
+**Folder:** `programs/03_threads_dual_led/`
+
+**Wiring:**
+```
+Pico 2 GP14  →  [330Ω]  →  LED1 (+)  →  GND   (blinks every 500 ms)
+Pico 2 GP15  →  [330Ω]  →  LED2 (+)  →  GND   (blinks every 200 ms)
+```
+
+**What it does:**
+- Thread 1 (main): toggles LED1 every **500 ms**
+- Thread 2 (spawned via `K_THREAD_DEFINE`): toggles LED2 every **200 ms**
+- Both run **simultaneously** — demonstrating true RTOS multithreading
+
+**MicroPython → Zephyr translation:**
+
+| MicroPython | Zephyr RTOS |
+|-------------|-------------|
+| `_thread.start_new_thread(fn, ())` | `K_THREAD_DEFINE(name, stack, fn, ...)` |
+| `time.sleep(0.5)` | `k_sleep(K_MSEC(500))` |
+| `led.toggle()` | `gpio_pin_toggle(dev, pin)` |
+
+**Build:**
+```powershell
+west build -b rpi_pico2/rp2350a/m33 programs\03_threads_dual_led
+```
+
+---
+
+### 04 — Emergency Monitor & Non-Blocking Timers
+
+**Folder:** `programs/04_emergency_monitor/`
+
+**Wiring:**
+```
+Pico 2 GP14  →  [330Ω]  →  LED_FAST (+)      →  GND
+Pico 2 GP15  →  [330Ω]  →  LED_SLOW (+)      →  GND
+Pico 2 GP13  →  [330Ω]  →  LED_EMERGENCY (+) →  GND
+Pico 2 GP16  →  Touch Sensor / Button        →  3.3V (VCC)
+```
+
+**What it does:**
+- Thread 1 (Main Loop):
+  - Uses `k_uptime_get_32()` to check the time non-blockingly.
+  - Toggles `LED_FAST` every **200 ms**.
+  - Toggles `LED_SLOW` every **1000 ms**.
+- Thread 2 (Emergency Monitor):
+  - Continuously checks the sensor on `GP16`.
+  - If triggered (goes HIGH), it interrupts its normal wait and rapidly flashes `LED_EMERGENCY` 5 times with a 50ms delay.
+
+**MicroPython → Zephyr translation:**
+
+| MicroPython | Zephyr RTOS |
+|-------------|-------------|
+| `time.ticks_ms()` | `k_uptime_get_32()` |
+| `time.ticks_diff(c, l)` | `current_time - last_time` |
+| `Pin(16, IN, PULL_DOWN)` | `gpio_pin_configure(..., GPIO_INPUT \| GPIO_PULL_DOWN)` |
+
+**Build:**
+```powershell
+west build -b rpi_pico2/rp2350a/m33 programs\04_emergency_monitor
+```
+
+---
+
 ## How to Flash Every Time
 
 Each time you want to flash a NEW program:
@@ -319,7 +385,7 @@ Or use the helper script:
 
 - [x] 01 — 3-Color LED Blink
 - [x] 02 — DC Motor Control (L298N + PWM)
-- [ ] 03 — Button Input + Interrupt
+- [x] 03 — Dual LED Blink with RTOS Threads
 - [ ] 04 — PWM LED Fade
 - [ ] 05 — UART Serial Monitor
 - [ ] 06 — I²C Temperature Sensor
