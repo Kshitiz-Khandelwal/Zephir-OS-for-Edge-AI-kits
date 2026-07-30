@@ -241,10 +241,20 @@ void display_task(void *a, void *b, void *c)
 }
 
 /* ── Spawn the Threads ── */
-K_THREAD_DEFINE(thread_temp, STACK_SIZE, temperature_task, NULL, NULL, NULL, PRIORITY, 0, 1000);
-K_THREAD_DEFINE(thread_light, STACK_SIZE, light_task, NULL, NULL, NULL, PRIORITY, 0, 1000);
-K_THREAD_DEFINE(thread_joy, STACK_SIZE, joystick_task, NULL, NULL, NULL, PRIORITY, 0, 1000);
-K_THREAD_DEFINE(thread_disp, STACK_SIZE, display_task, NULL, NULL, NULL, PRIORITY, 0, 1000);
+/*
+ * Do not start these threads until main() has configured the ADC and GPIO.
+ * Starting them with a fixed delay races main() and can make the display task
+ * access gpio_dev while it is still NULL.
+ */
+K_THREAD_STACK_DEFINE(temp_stack, STACK_SIZE);
+K_THREAD_STACK_DEFINE(light_stack, STACK_SIZE);
+K_THREAD_STACK_DEFINE(joy_stack, STACK_SIZE);
+K_THREAD_STACK_DEFINE(disp_stack, STACK_SIZE);
+
+struct k_thread thread_temp;
+struct k_thread thread_light;
+struct k_thread thread_joy;
+struct k_thread thread_disp;
 
 /* ── Main Setup ── */
 int main(void)
@@ -274,6 +284,15 @@ int main(void)
 	printf("\n==========================================\n");
 	printf("Advanced Sensor Display Started\n");
 	printf("==========================================\n");
+
+	/* Hardware smoke test: all segments must light for two seconds. */
+	tm1637_display("8888");
+	k_sleep(K_MSEC(2000));
+
+	k_thread_create(&thread_temp, temp_stack, K_THREAD_STACK_SIZEOF(temp_stack), temperature_task, NULL, NULL, NULL, PRIORITY, 0, K_NO_WAIT);
+	k_thread_create(&thread_light, light_stack, K_THREAD_STACK_SIZEOF(light_stack), light_task, NULL, NULL, NULL, PRIORITY, 0, K_NO_WAIT);
+	k_thread_create(&thread_joy, joy_stack, K_THREAD_STACK_SIZEOF(joy_stack), joystick_task, NULL, NULL, NULL, PRIORITY, 0, K_NO_WAIT);
+	k_thread_create(&thread_disp, disp_stack, K_THREAD_STACK_SIZEOF(disp_stack), display_task, NULL, NULL, NULL, PRIORITY, 0, K_NO_WAIT);
 
 	return 0;
 }

@@ -11,7 +11,7 @@ This program represents an advanced architectural upgrade to the Multiple Sensor
 | **Joystick X-axis** | GP28 (ADC2) | Connected internally on IoT Board |
 | **TM1637 CLK** | GP3 | |
 | **TM1637 DIO** | GP2 | |
-| **TM1637 VCC** | 5V (VBUS) | Must be 5V for maximum brightness |
+| **TM1637 VCC** | 3V3(OUT) | Use 3.3 V so the display's CLK/DIO pull-ups never put 5 V on Pico GPIO. |
 | **TM1637 GND** | GND | |
 
 ## 🧠 Concepts Explained: Shared Resources & Mutexes
@@ -40,6 +40,11 @@ To prevent a **Race Condition** (e.g., the Display thread trying to read the tem
 Before any thread touches `shared_sensors`, it must call `k_mutex_lock()`. Once it's done reading or writing, it calls `k_mutex_unlock()`. This ensures absolute data integrity.
 
 ### Expected Output
+Immediately after flashing, the display must show `8888` for two seconds. This
+is a hardware-only smoke test: if it does not appear, stop and check the four
+TM1637 wires before checking any sensor code. Use **3V3(OUT)** for VCC, not
+VBUS/5V; Pico GPIO pins are not 5 V tolerant.
+
 On the **TM1637 Display**, the values automatically cycle every 2 seconds:
 - `"t 29"` (Temperature) -> `"L512"` (Light) -> `"J 42"` (Joystick)
 
