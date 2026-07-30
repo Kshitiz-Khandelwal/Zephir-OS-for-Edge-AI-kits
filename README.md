@@ -245,6 +245,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Non-blocking main loop timers plus a dedicated thread monitoring a sensor.
 - [View Wiring & Details](programs/04_emergency_monitor/)
 
+### 05 — TM1637 Display & Heartbeat (Bit-Banging)
+**Folder:** `programs/05_tm1637_display/`
+- Custom Bit-Banged communication protocol in C with concurrent LED heartbeat.
+- [View Wiring & Concepts Explained](programs/05_tm1637_display/)
+
 ---
 
 ## How to Flash Every Time
