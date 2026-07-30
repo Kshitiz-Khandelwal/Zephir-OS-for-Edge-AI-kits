@@ -260,6 +260,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Uses an RTOS Semaphore to signal a Display Thread to update the TM1637 (OPEN/LOCK) when an Input Thread detects a button press.
 - [View Wiring & Concepts Explained](programs/07_semaphores/)
 
+### 08 — Mutexes & Resource Protection
+**Folder:** `programs/08_mutex/`
+- Uses an RTOS Mutex to protect a shared resource (the TM1637 display) from being simultaneously accessed and corrupted by two different threads.
+- [View Wiring & Concepts Explained](programs/08_mutex/)
+
 ---
 
 ## Concepts & Theory 🧠
