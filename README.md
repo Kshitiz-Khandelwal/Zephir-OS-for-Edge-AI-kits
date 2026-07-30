@@ -255,6 +255,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Spawns 3 independent RTOS threads and uses thread priority to allow an emergency task to preempt normal tasks.
 - [View Wiring & Concepts Explained](programs/06_thread_priorities/)
 
+### 07 — Semaphores & Cross-Thread Signaling
+**Folder:** `programs/07_semaphores/`
+- Uses an RTOS Semaphore to signal a Display Thread to update the TM1637 (OPEN/LOCK) when an Input Thread detects a button press.
+- [View Wiring & Concepts Explained](programs/07_semaphores/)
+
 ---
 
 ## Concepts & Theory 🧠
