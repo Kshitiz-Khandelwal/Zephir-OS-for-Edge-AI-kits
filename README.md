@@ -265,6 +265,21 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Uses an RTOS Mutex to protect a shared resource (the TM1637 display) from being simultaneously accessed and corrupted by two different threads.
 - [View Wiring & Concepts Explained](programs/08_mutex/)
 
+### 09 — Message Queues (Data Passing)
+**Folder:** `programs/09_message_queue/`
+- Uses an RTOS Message Queue to safely pass data (simulated temperature) between a Producer Thread and a Consumer Display Thread without using global variables.
+- [View Wiring & Concepts Explained](programs/09_message_queue/)
+
+### 10 — Software Timers (No Delays)
+**Folder:** `programs/10_software_timers/`
+- Uses an RTOS Kernel Software Timer (`k_timer`) to trigger an LED blink precisely every 5 seconds, entirely eliminating the need for threads or blocking delay loops.
+- [View Wiring & Concepts Explained](programs/10_software_timers/)
+
+### 11 — GPIO Interrupts (Hardware ISR)
+**Folder:** `programs/11_gpio_interrupt/`
+- Configures a hardware interrupt on GP2 so the CPU instantly halts whatever it's doing (even sleeping) to service a button press with zero latency, entirely replacing inefficient polling.
+- [View Wiring & Concepts Explained](programs/11_gpio_interrupt/)
+
 ---
 
 ## Concepts & Theory 🧠
