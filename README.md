@@ -252,6 +252,12 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 
 ---
 
+## Concepts & Theory 🧠
+If you're learning about Embedded Systems alongside these programs, check out the detailed documentation here:
+- [Sleep vs. Delay vs. Blocking in Embedded Systems](docs/Sleep_vs_Delay.md)
+
+---
+
 ## How to Flash Every Time
 
 Each time you want to flash a NEW program:
