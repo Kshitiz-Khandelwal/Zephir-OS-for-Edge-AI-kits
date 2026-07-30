@@ -295,6 +295,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - A capstone architectural upgrade. Combines 3 independent ADC sensor threads and 1 TM1637 display thread. Safely shares sensor data across all 4 threads using an RTOS Mutex (`k_mutex`) while seamlessly outputting to both hardware and Serial!
 - [View Wiring & Concepts Explained](programs/14_advanced_sensor_display/)
 
+### 15 — Task Communication (Keypad Producer/Consumer)
+**Folder:** `programs/15_keypad_communication/`
+- Demonstrates the classic RTOS Producer-Consumer pattern. A Keypad thread (Producer) scans a 4x4 matrix and safely passes the pressed key via a Mutex to a Display thread (Consumer) which processes it independently.
+- [View Wiring & Concepts Explained](programs/15_keypad_communication/)
+
 ---
 
 ## Concepts & Theory 🧠
