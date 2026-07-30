@@ -1,6 +1,16 @@
 / {
+	chosen {
+		zephyr,console = &cdc_acm_uart0;
+	};
+
 	zephyr,user {
 		io-channels = <&adc 0>, <&adc 1>, <&adc 2>;
+	};
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
 	};
 };
 

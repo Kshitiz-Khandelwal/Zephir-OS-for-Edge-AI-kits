@@ -249,6 +249,9 @@ K_THREAD_DEFINE(thread_disp, STACK_SIZE, display_task, NULL, NULL, NULL, PRIORIT
 /* ── Main Setup ── */
 int main(void)
 {
+	/* Allow time for USB CDC ACM to enumerate on PC */
+	k_sleep(K_MSEC(2000));
+
 	if (!device_is_ready(adc_dev)) {
 		printf("ADC device not ready!\n");
 		return -1;
