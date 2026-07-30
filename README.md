@@ -305,6 +305,11 @@ Each program has its own folder containing the source code, pre-compiled `.uf2` 
 - Solves the problem of threads running at vastly different speeds. A 1000ms Logger thread updates an ADC reading and sets a `new_data` flag, which a hyper-responsive 100ms Display thread consumes immediately without wasting CPU cycles.
 - [View Wiring & Concepts Explained](programs/16_data_logging/)
 
+### 17 — Producer-Consumer Model (Potentiometer)
+**Folder:** `programs/17_producer_consumer_potentiometer/`
+- Implements Experiment 9. A Sampling Task mathematically scales raw 12-bit ADC data into a 16-bit format, passes it via an RTOS Mutex to a Processing Task, which computes and displays the real-time percentage (0-100%) to the USB console.
+- [View Wiring & Concepts Explained](programs/17_producer_consumer_potentiometer/)
+
 ---
 
 ## Concepts & Theory 🧠
