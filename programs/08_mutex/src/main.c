@@ -16,8 +16,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
-#include <stdio.h>
-#include <string.h>
+#include <zephyr/sys/printk.h>
 
 /* ── Pins ── */
 #define CLK_PIN 16
@@ -32,60 +31,69 @@ static const struct device *gpio_dev;
 /* This mutex ensures only one thread can talk to the display at a time */
 K_MUTEX_DEFINE(display_mutex);
 
-/* ── Character map for TM1637 ── */
-static uint8_t get_char_code(char c) {
-	switch (c) {
-		case 'A': return 0x77; case 'D': return 0x5E;
-		case 'G': return 0x3D; case 'I': return 0x30;
-		case 'N': return 0x54; case 'P': return 0x73;
-		case 'T': return 0x78;
-		default:  return 0x00; /* Space */
-	}
-}
+/* ── 7-Segment Codes for 0-9 ── */
+static const uint8_t digits[] = {
+	0x3F, 0x06, 0x5B, 0x4F, 0x66,
+	0x6D, 0x7D, 0x07, 0x7F, 0x6F
+};
 
 /* ── TM1637 Bit-Bang Functions ── */
 static void start(void) {
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 	gpio_pin_set(gpio_dev, DIO_PIN, 1);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, DIO_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
+	k_busy_wait(5);
 }
 
 static void stop(void) {
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, DIO_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, DIO_PIN, 1);
+	k_busy_wait(5);
 }
 
 static void write_byte(uint8_t b) {
-	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT | GPIO_OPEN_DRAIN);
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 	for (int i = 0; i < 8; i++) {
 		gpio_pin_set(gpio_dev, CLK_PIN, 0);
+		k_busy_wait(5);
 		gpio_pin_set(gpio_dev, DIO_PIN, b & 1);
-		k_busy_wait(20);
+		k_busy_wait(5);
 		gpio_pin_set(gpio_dev, CLK_PIN, 1);
-		k_busy_wait(20);
+		k_busy_wait(5);
 		b >>= 1;
 	}
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_INPUT | GPIO_PULL_UP);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
-	k_busy_wait(20);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
-	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT | GPIO_OPEN_DRAIN);
+	k_busy_wait(5);
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 }
 
 /* ── Thread-Safe Display Function ── */
-static void safe_display_text(const char *text) {
+static void safe_display_number(int number) {
 	/* Lock the Mutex! If another thread is currently holding it,
 	 * this thread will block (sleep) right here until it's unlocked. */
 	k_mutex_lock(&display_mutex, K_FOREVER);
 
-	char padded[5] = "    ";
-	int len = strlen(text);
-	if (len > 4) len = 4;
-	for (int i = 0; i < len; i++) { padded[i] = text[i]; }
+	number = number % 10000;
+	int d1 = number / 1000;
+	int d2 = (number / 100) % 10;
+	int d3 = (number / 10) % 10;
+	int d4 = number % 10;
 
 	start();
 	write_byte(0x40);
@@ -93,11 +101,14 @@ static void safe_display_text(const char *text) {
 
 	start();
 	write_byte(0xC0);
-	for (int i = 0; i < 4; i++) { write_byte(get_char_code(padded[i])); }
+	write_byte(digits[d1]);
+	write_byte(digits[d2]);
+	write_byte(digits[d3]);
+	write_byte(digits[d4]);
 	stop();
 
 	start();
-	write_byte(0x8A);
+	write_byte(0x8F); /* 0x80 | 8 (display on) | 7 (brightness) */
 	stop();
 
 	/* We are done communicating with the display. Unlock the Mutex!
@@ -106,32 +117,40 @@ static void safe_display_text(const char *text) {
 }
 
 /* ─────────────────────────────────────────────────────────────
- * Thread 1: Sensor Task
- * Displays "DATA" every 1.5 seconds.
+ * Thread 1: Task 1
+ * Displays and prints task1_counter every 1 second.
  * ───────────────────────────────────────────────────────────── */
-void sensor_thread(void *a, void *b, void *c)
-{
-	while (1) {
-		safe_display_text("DATA");
-		k_sleep(K_MSEC(1500));
-	}
-}
+static int task1_counter = 0;
 
-/* ─────────────────────────────────────────────────────────────
- * Thread 2: Main Task
- * Displays "PING" every 1.0 seconds.
- * ───────────────────────────────────────────────────────────── */
-void main_thread(void *a, void *b, void *c)
+void task1_thread(void *a, void *b, void *c)
 {
 	while (1) {
-		safe_display_text("PING");
+		safe_display_number(task1_counter);
+		printk("Task 1 writing: %d\n", task1_counter);
+		task1_counter++;
 		k_sleep(K_MSEC(1000));
 	}
 }
 
+/* ─────────────────────────────────────────────────────────────
+ * Thread 2: Task 2
+ * Displays and prints task2_counter every 2 seconds.
+ * ───────────────────────────────────────────────────────────── */
+static int task2_counter = 1000;
+
+void task2_thread(void *a, void *b, void *c)
+{
+	while (1) {
+		safe_display_number(task2_counter);
+		printk("Task 2 writing: %d\n", task2_counter);
+		task2_counter++;
+		k_sleep(K_MSEC(2000));
+	}
+}
+
 /* ── Spawn the threads ── */
-K_THREAD_DEFINE(thread_sensor, STACK_SIZE, sensor_thread, NULL, NULL, NULL, PRIORITY, 0, 100);
-K_THREAD_DEFINE(thread_main, STACK_SIZE, main_thread, NULL, NULL, NULL, PRIORITY, 0, 100);
+K_THREAD_DEFINE(thread_1, STACK_SIZE, task1_thread, NULL, NULL, NULL, PRIORITY, 0, 100);
+K_THREAD_DEFINE(thread_2, STACK_SIZE, task2_thread, NULL, NULL, NULL, PRIORITY, 0, 100);
 
 /* ── Main Setup ── */
 int main(void)
@@ -142,7 +161,7 @@ int main(void)
 	}
 
 	gpio_pin_configure(gpio_dev, CLK_PIN, GPIO_OUTPUT_INACTIVE);
-	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT | GPIO_OPEN_DRAIN);
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT_INACTIVE);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
 	gpio_pin_set(gpio_dev, DIO_PIN, 1);
 
