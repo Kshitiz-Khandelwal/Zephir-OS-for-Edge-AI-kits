@@ -71,35 +71,48 @@ static uint8_t get_char_code(char c) {
 }
 
 static void start(void) {
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 	gpio_pin_set(gpio_dev, DIO_PIN, 1);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, DIO_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
+	k_busy_wait(5);
 }
 
 static void stop(void) {
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, DIO_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, DIO_PIN, 1);
+	k_busy_wait(5);
 }
 
 static void write_byte(uint8_t b) {
-	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT | GPIO_OPEN_DRAIN);
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 	for (int i = 0; i < 8; i++) {
 		gpio_pin_set(gpio_dev, CLK_PIN, 0);
+		k_busy_wait(5);
 		gpio_pin_set(gpio_dev, DIO_PIN, b & 1);
-		k_busy_wait(20);
+		k_busy_wait(5);
 		gpio_pin_set(gpio_dev, CLK_PIN, 1);
-		k_busy_wait(20);
+		k_busy_wait(5);
 		b >>= 1;
 	}
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
+	k_busy_wait(5);
 	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_INPUT | GPIO_PULL_UP);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
-	k_busy_wait(20);
+	k_busy_wait(5);
 	gpio_pin_set(gpio_dev, CLK_PIN, 0);
-	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT | GPIO_OPEN_DRAIN);
+	k_busy_wait(5);
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT);
 }
 
 static void tm1637_display(const char *str) {
@@ -115,7 +128,7 @@ static void tm1637_display(const char *str) {
 	stop();
 
 	start();
-	write_byte(0x8A);
+	write_byte(0x8F); /* 0x80 | 8 (display on) | 7 (brightness) */
 	stop();
 }
 
@@ -277,7 +290,7 @@ int main(void)
 	}
 
 	gpio_pin_configure(gpio_dev, CLK_PIN, GPIO_OUTPUT_INACTIVE);
-	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT | GPIO_OPEN_DRAIN);
+	gpio_pin_configure(gpio_dev, DIO_PIN, GPIO_OUTPUT_INACTIVE);
 	gpio_pin_set(gpio_dev, CLK_PIN, 1);
 	gpio_pin_set(gpio_dev, DIO_PIN, 1);
 
